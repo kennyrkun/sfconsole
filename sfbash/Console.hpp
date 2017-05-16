@@ -13,6 +13,8 @@ public:
 	Console(std::string $title, sf::Vector2i dimensions);
 	~Console();
 
+
+
 	void create();
 	void close();
 	void log(std::string message);
