@@ -15,7 +15,7 @@ Console::Console(std::string $title)
 	newline.setString("SFBash [Version: something]");
 	newline.setCharacterSize(13);
 	newline.setFont(font);
-	newline.setPosition(0, -2);
+	newline.setPosition(0, 0);
 	lines.push_back(newline);
 
 	std::cout << "New console created." << std::endl;
@@ -101,16 +101,12 @@ void Console::create()
 			{
 //				std::cout << event.mouseWheel.delta << std::endl;
 
-				if (event.mouseWheel.delta > 0) // up
+				if (event.mouseWheel.delta < 0) // up
 				{
-					std::cout << "up" << std::endl;
-
 					view.move(0, 13);
 				}
-				else // down
+				else if (event.mouseWheel.delta > 0 && (view.getCenter().y - view.getSize().y / 2 ) > 0) // down
 				{
-					std::cout << "down" << std::endl;
-
 					lines[1].setString("test");
 
 					view.move(0, -13);
@@ -146,12 +142,12 @@ void Console::close()
 
 void Console::log(std::string message)
 {
-	std::cout << "logging \"" + message + "\"" << std::endl;
+//	std::cout << "logging \"" + message + "\"" << std::endl;
 
 	sf::Text newline;
 	newline.setString(message);
 	newline.setFont(font);
 	newline.setCharacterSize(13);
-	newline.setPosition(0, lines.back().getPosition().y + 12);
+	newline.setPosition(0, lines.back().getPosition().y + 13);
 	lines.push_back(newline);
 }
