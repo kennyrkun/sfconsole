@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sfbash", "sfbash\sfbash.vcxproj", "{65B29694-9E9B-4D61-B210-AC0FA8E81B85}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sfconsole", "sfconsole\sfconsole.vcxproj", "{65B29694-9E9B-4D61-B210-AC0FA8E81B85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
