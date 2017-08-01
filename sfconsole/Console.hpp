@@ -15,10 +15,12 @@ public:
 	void create();
 	void close();
 	void Main();
-	void printLine(std::wstring string);
+	void printLine(std::string string);
 
 	void enableInput();
 	void disableInput();
+
+	std::vector<sf::Text> lines;
 
 private:
 	sf::RenderWindow window;

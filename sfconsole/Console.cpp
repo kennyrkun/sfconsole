@@ -4,7 +4,6 @@
 #include <thread>
 #include <chrono>
 
-std::vector<sf::Text> lines;
 sf::Font font;
 sf::Text userInput;
 sf::RectangleShape thingybehindtheuserinput;
@@ -19,7 +18,7 @@ sfConsole::sfConsole(std::string $title)
 	font.loadFromFile("C:\\Windows\\Fonts\\Arial.ttf");
 
 	sf::Text newline;
-	newline.setString("SFBash [Version: something]");
+	newline.setString("SFConsole [Version: something]");
 	newline.setCharacterSize(13);
 	newline.setFont(font);
 	newline.setPosition(sf::Vector2f(2, 0));
@@ -55,7 +54,7 @@ void sfConsole::create()
 	scrollbar_bar.setPosition(sf::Vector2f(static_cast<int>(window.getSize().x) - (scrollbar_background.getLocalBounds().width / 2) - scrollbar_bar.getLocalBounds().width / 2, 20));
 	scrollbar_bar.setFillColor(sf::Color(190, 190, 190));
 
-	Main();
+//	Main();
 }
 
 void sfConsole::close()
@@ -63,7 +62,7 @@ void sfConsole::close()
 	window.close();
 }
 
-void sfConsole::printLine(std::wstring string)
+void sfConsole::printLine(std::string string)
 {
 	update = true;
 
@@ -175,7 +174,7 @@ void sfConsole::ProcessInput(sf::Event &e)
 {
 	if (e.text.unicode < 128) // something on a keyboard
 	{
-		std::wstring message = userInput.getString(); // temp string
+		std::string message = userInput.getString(); // temp string
 
 		if (e.text.unicode == 13) // return key
 		{
