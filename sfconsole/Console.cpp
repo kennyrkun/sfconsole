@@ -6,8 +6,15 @@
 
 std::vector<sf::Text> lines;
 sf::Font font;
+sf::Text userInput;
+sf::RectangleShape thingybehindtheuserinput;
 
-Console::Console(std::string $title)
+bool update(false);
+bool canDoInput(false);
+
+// Public
+
+sfConsole::sfConsole(std::string $title)
 {
 	font.loadFromFile("C:\\Windows\\Fonts\\Arial.ttf");
 
@@ -15,20 +22,27 @@ Console::Console(std::string $title)
 	newline.setString("SFBash [Version: something]");
 	newline.setCharacterSize(13);
 	newline.setFont(font);
-	newline.setPosition(0, 0);
+	newline.setPosition(sf::Vector2f(2, 0));
 	lines.push_back(newline);
+
+	userInput.setFont(font);
+	userInput.setCharacterSize(13);
+//	userInput.setString("> ");
+
+	thingybehindtheuserinput.setSize(sf::Vector2f(8, 3));
+	thingybehindtheuserinput.setOrigin(sf::Vector2f(thingybehindtheuserinput.getLocalBounds().width / 2, thingybehindtheuserinput.getLocalBounds().height / 2));
 
 	std::cout << "New console created." << std::endl;
 }
 
-Console::~Console()
+sfConsole::~sfConsole()
 {
 	window.close();
 
 	std::cout << "Console destroyed." << std::endl;
 }
 
-void Console::create()
+void sfConsole::create()
 {
 	window.create(sf::VideoMode(665, 315), "Console", sf::Style::Close);
 	window.setPosition(sf::Vector2i(20, 20));
@@ -44,18 +58,44 @@ void Console::create()
 	Main();
 }
 
-void Console::close()
+void sfConsole::close()
 {
 	window.close();
 }
 
-void Console::Main()
+void sfConsole::printLine(std::wstring string)
 {
-	sf::View view;
-	view.setSize(sf::Vector2f(window.getSize()));
-	view.setCenter(sf::Vector2f(window.getView().getCenter()));
+	update = true;
 
-	window.setView(view);
+	sf::Text newline;
+	newline.setString(string);
+	newline.setFont(font);
+	newline.setCharacterSize(13);
+	newline.setPosition(2, lines.back().getPosition().y + 13);
+
+	lines.push_back(newline);
+}
+
+void sfConsole::Update()
+{
+	std::cout << "updating" << std::endl;
+
+	scrollbar_background.setPosition(sf::Vector2f((viewArea.getCenter().x * 2) - (scrollbar_background.getLocalBounds().width / 2), viewArea.getCenter().y));
+	scrollbar_bar.setPosition(sf::Vector2f(scrollbar_background.getPosition().x - scrollbar_background.getLocalBounds().width / 2, scrollbar_background.getPosition().y));
+	userInput.setPosition(sf::Vector2f(2, lines.back().getPosition().y + 13));
+	thingybehindtheuserinput.setPosition(sf::Vector2f(userInput.getPosition().x + (userInput.getLocalBounds().width + 8), userInput.getPosition().y + 13));
+
+	update = false;
+}
+
+void sfConsole::Main()
+{
+	update = true;
+
+	viewArea.setSize(sf::Vector2f(window.getSize()));
+	viewArea.setCenter(sf::Vector2f(window.getView().getCenter()));
+
+	window.setView(viewArea);
 
 	while (window.isOpen())
 	{
@@ -63,57 +103,103 @@ void Console::Main()
 		while (window.pollEvent(event))
 		{
 			if (event.type == sf::Event::EventType::Closed)
+			{
 				window.close();
-
+			}
 			else if (event.type == sf::Event::EventType::MouseWheelMoved)
 			{
-				//				std::cout << event.mouseWheel.delta << std::endl;
-
 				if (event.mouseWheel.delta < 0) // up
 				{
-					view.move(0, 13);
+					viewArea.move(0, 13);
 				}
-				else if (event.mouseWheel.delta > 0 && (view.getCenter().y - view.getSize().y / 2) > 0) // down
+				else if (event.mouseWheel.delta > 0 && (viewArea.getCenter().y - viewArea.getSize().y / 2) > 0) // down
 				{
-					lines[1].setString("test");
-
-					view.move(0, -13);
+					viewArea.move(0, -13);
 				}
+
+				update = true;
 			}
-		}
-
-		scrollbar_background.setPosition((view.getCenter().x * 2) - (scrollbar_background.getLocalBounds().width / 2), view.getCenter().y);
-		scrollbar_bar.setPosition(scrollbar_background.getPosition().x, scrollbar_background.getPosition().y);
-
-		window.clear();
-
-		window.draw(scrollbar_background);
-		window.draw(scrollbar_bar);
-		window.draw(scrollbar_up);
-		window.draw(scrollbar_down);
-
-		window.setView(view);
-
-		if (!lines.empty())
-		{
-			for (size_t i = 0; i < lines.size(); i++)
+			else if (canDoInput && event.type == sf::Event::EventType::TextEntered)
 			{
-				window.draw(lines[i]);
+				ProcessInput(event);
+				update = true;
 			}
 		}
 
-		window.display();
+		if (update)
+		{
+			Update();
+			Render();
+		}
 	}
 }
 
-void Console::log(std::string message)
+void sfConsole::enableInput()
 {
-//	std::cout << "logging \"" + message + "\"" << std::endl;
+	canDoInput = true;
+}
 
-	sf::Text newline;
-	newline.setString(message);
-	newline.setFont(font);
-	newline.setCharacterSize(13);
-	newline.setPosition(2, lines.back().getPosition().y + 13);
-	lines.push_back(newline);
+void sfConsole::disableInput()
+{
+	canDoInput = false;
+}
+
+// Private
+
+void sfConsole::Render()
+{
+	window.clear();
+
+	window.draw(scrollbar_background);
+	window.draw(scrollbar_bar);
+	window.draw(scrollbar_up);
+	window.draw(scrollbar_down);
+
+	window.setView(viewArea);
+
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		window.draw(lines[i]);
+	}
+
+	if (canDoInput)
+	{
+		window.draw(userInput);
+		window.draw(thingybehindtheuserinput);
+	}
+
+	window.display();
+}
+
+void sfConsole::ProcessInput(sf::Event &e)
+{
+	if (e.text.unicode < 128) // something on a keyboard
+	{
+		std::wstring message = userInput.getString(); // temp string
+
+		if (e.text.unicode == 13) // return key
+		{
+			if (message.length() != 0) // can't send nothing, can we?
+			{
+				printLine(message);
+			}
+			else // length != 0
+			{
+				std::cout << "cannot send an empty message" << std::endl;
+			}
+
+			message.clear();
+		}
+		else if (e.text.unicode == 8) // backspace
+		{
+			if (message.length() != 0) // can't remove nothing
+				message.pop_back();
+		}
+		else // regular characters
+		{
+			message += static_cast<wchar_t>(e.text.unicode);
+		}
+
+		userInput.setString(message);
+	}
 }

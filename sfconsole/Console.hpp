@@ -6,21 +6,19 @@
 #include <string>
 #include <vector>
 
-class Console
+class sfConsole
 {
 public:
-	Console(std::string $title);
-	~Console();
+	sfConsole(std::string $title);
+	~sfConsole();
 
 	void create();
 	void close();
-
 	void Main();
-	void Render();
-//	void Update();
-	void ProcessInputs(sf::Event &e);
+	void printLine(std::wstring string);
 
-	void log(std::string message);
+	void enableInput();
+	void disableInput();
 
 private:
 	sf::RenderWindow window;
@@ -29,6 +27,12 @@ private:
 	sf::RectangleShape scrollbar_bar;
 	sf::RectangleShape scrollbar_up;
 	sf::RectangleShape scrollbar_down;
+
+	sf::View viewArea;
+
+	void Update();
+	void Render();
+	void ProcessInput(sf::Event &e);
 };
 
 #endif /* CONSOLE_HPP */
