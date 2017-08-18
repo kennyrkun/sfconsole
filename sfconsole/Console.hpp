@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "Scrollbar.hpp"
+
 class sfConsole
 {
 public:
@@ -20,17 +22,16 @@ public:
 	void enableInput();
 	void disableInput();
 
+	bool isOpen() { return m_open; }
+
 	std::vector<sf::Text> lines;
 
 private:
 	sf::RenderWindow window;
+	bool m_open;
 
-	sf::RectangleShape scrollbar_background;
-	sf::RectangleShape scrollbar_bar;
-	sf::RectangleShape scrollbar_up;
-	sf::RectangleShape scrollbar_down;
-
-	sf::View viewArea;
+	sf::View viewScroller;
+	Scrollbar scrollbar;
 
 	void Update();
 	void Render();

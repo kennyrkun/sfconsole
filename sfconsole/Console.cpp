@@ -45,20 +45,14 @@ void sfConsole::create()
 {
 	window.create(sf::VideoMode(665, 315), "Console", sf::Style::Close);
 	window.setPosition(sf::Vector2i(20, 20));
+	scrollbar.create(&window);
 
-	scrollbar_background.setSize(sf::Vector2f(20.0f, static_cast<int>(window.getSize().y)));
-	scrollbar_background.setOrigin(sf::Vector2f(scrollbar_background.getLocalBounds().width / 2.0f, scrollbar_background.getLocalBounds().height / 2.0f));
-	scrollbar_background.setPosition(sf::Vector2f(static_cast<int>(window.getSize().x) - scrollbar_background.getLocalBounds().width / 2.0f, window.getSize().y / 2.0f));
-
-	scrollbar_bar.setSize(sf::Vector2f(16, (static_cast<int>(window.getSize().y) - lines.size()) / 4.0f));
-	scrollbar_bar.setPosition(sf::Vector2f(static_cast<int>(window.getSize().x) - (scrollbar_background.getLocalBounds().width / 2) - scrollbar_bar.getLocalBounds().width / 2, 20));
-	scrollbar_bar.setFillColor(sf::Color(190, 190, 190));
-
-//	Main();
+	m_open = true;
 }
 
 void sfConsole::close()
 {
+	m_open = false;
 	window.close();
 }
 
@@ -79,8 +73,12 @@ void sfConsole::Update()
 {
 	std::cout << "updating" << std::endl;
 
-	scrollbar_background.setPosition(sf::Vector2f((viewArea.getCenter().x * 2) - (scrollbar_background.getLocalBounds().width / 2), viewArea.getCenter().y));
-	scrollbar_bar.setPosition(sf::Vector2f(scrollbar_background.getPosition().x - scrollbar_background.getLocalBounds().width / 2, scrollbar_background.getPosition().y));
+	// set the scrollbar size
+	float contentHeight = 0;
+		contentHeight += 13 * lines.size();
+
+	scrollbar.update(contentHeight, viewScroller.getSize().y);
+
 	userInput.setPosition(sf::Vector2f(2, lines.back().getPosition().y + 13));
 	thingybehindtheuserinput.setPosition(sf::Vector2f(userInput.getPosition().x + (userInput.getLocalBounds().width + 8), userInput.getPosition().y + 13));
 
@@ -89,12 +87,13 @@ void sfConsole::Update()
 
 void sfConsole::Main()
 {
-	update = true;
+	viewScroller.setSize(sf::Vector2f(window.getSize()));
+	viewScroller.setCenter(sf::Vector2f(window.getView().getCenter()));
+	window.setView(viewScroller);
 
-	viewArea.setSize(sf::Vector2f(window.getSize()));
-	viewArea.setCenter(sf::Vector2f(window.getView().getCenter()));
+	Update();
 
-	window.setView(viewArea);
+//	update = true;
 
 	while (window.isOpen())
 	{
@@ -103,17 +102,25 @@ void sfConsole::Main()
 		{
 			if (event.type == sf::Event::EventType::Closed)
 			{
-				window.close();
+				close();
 			}
 			else if (event.type == sf::Event::EventType::MouseWheelMoved)
 			{
 				if (event.mouseWheel.delta < 0) // up
 				{
-					viewArea.move(0, 13);
+//					if ((viewScroller.getCenter().y - viewScroller.getSize().y) < scrollbar.scrollJumpMultiplier) // top of the thing
+					{
+						viewScroller.move(0, static_cast<int>(scrollbar.scrollJump));
+						scrollbar.moveThumbUp();
+					}
 				}
-				else if (event.mouseWheel.delta > 0 && (viewArea.getCenter().y - viewArea.getSize().y / 2) > 0) // down
+				else if (event.mouseWheel.delta > 0) // scroll down
 				{
-					viewArea.move(0, -13);
+//					if ((viewScroller.getCenter().y - viewScroller.getSize().y / 2) > scrollbar.scrollJumpMultiplier) // top of the thing
+					{
+						viewScroller.move(0, static_cast<int>(-scrollbar.scrollJump));
+						scrollbar.moveThumbDown();
+					}
 				}
 
 				update = true;
@@ -149,12 +156,15 @@ void sfConsole::Render()
 {
 	window.clear();
 
-	window.draw(scrollbar_background);
-	window.draw(scrollbar_bar);
-	window.draw(scrollbar_up);
-	window.draw(scrollbar_down);
+//	window.draw(scrollbar_background);
+//	window.draw(scrollbar_bar);
+//	window.draw(scrollbar_up);
+//	window.draw(scrollbar_down);
 
-	window.setView(viewArea);
+	window.setView(window.getDefaultView());
+	scrollbar.draw();
+
+	window.setView(viewScroller);
 
 	for (size_t i = 0; i < lines.size(); i++)
 	{
@@ -196,7 +206,7 @@ void sfConsole::ProcessInput(sf::Event &e)
 		}
 		else // regular characters
 		{
-			message += static_cast<wchar_t>(e.text.unicode);
+			message += static_cast<char>(e.text.unicode);
 		}
 
 		userInput.setString(message);
