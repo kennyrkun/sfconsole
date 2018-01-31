@@ -17,25 +17,38 @@ public:
 	void create();
 	void close();
 	void Main();
+
+	void print(std::string string);
 	void printLine(std::string string);
+	void clearScreen();
 
-	void enableInput();
-	void disableInput();
-
-	bool isOpen() { return m_open; }
+	bool isOpen() { return window.isOpen(); }
+	bool ready = false;
 
 	std::vector<sf::Text> lines;
 
+	void HandleEvents(const sf::Event &e);
+	void Update();
+	void Render();
+
 private:
 	sf::RenderWindow window;
-	bool m_open;
 
 	sf::View viewScroller;
 	Scrollbar scrollbar;
 
-	void Update();
-	void Render();
-	void ProcessInput(sf::Event &e);
+	sf::Font font;
+
+	void updateScrollThumbSize();
+	void updateScrollLimits();
+	// TODO: viewable area class
+	float scrollerTopPosition;
+	float scrollerBottomPosition;
+	float scrollerMinPosition;
+	float scrollerMaxPosition;
+
+	bool update;
+	bool repaint;
 };
 
 #endif /* CONSOLE_HPP */
